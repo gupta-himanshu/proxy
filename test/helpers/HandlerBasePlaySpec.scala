@@ -5,6 +5,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
 import handlers.Handler
+import io.flow.test.utils.FlowPlaySpec
 import io.flow.log.RollbarLogger
 import lib._
 import play.api.libs.json.{JsValue, Json}
@@ -12,9 +13,9 @@ import play.api.mvc.{Headers, Result}
 
 import scala.concurrent.duration.{FiniteDuration, MILLISECONDS}
 
-trait HandlerBasePlaySpec extends BasePlaySpec {
+trait HandlerBasePlaySpec extends FlowPlaySpec {
 
-  def logger: RollbarLogger
+  lazy val logger: RollbarLogger = app.injector.instanceOf[RollbarLogger]
 
   case class SimulatedResponse(
     server: Server,

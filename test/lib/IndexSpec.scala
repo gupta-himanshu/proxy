@@ -1,9 +1,12 @@
 package lib
 
-import helpers.BasePlaySpec
+import io.flow.log.RollbarLogger
+import io.flow.test.utils.FlowPlaySpec
+
 import scala.io.Source
 
-class IndexSpec extends BasePlaySpec {
+class IndexSpec extends FlowPlaySpec {
+  lazy val logger: RollbarLogger = app.injector.instanceOf[RollbarLogger]
 
   def configParser: ConfigParser = app.injector.instanceOf[ConfigParser]
 

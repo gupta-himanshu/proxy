@@ -1,9 +1,11 @@
 package lib
 
-import helpers.BasePlaySpec
+import io.flow.log.RollbarLogger
+import io.flow.test.utils.FlowPlaySpec
 import play.api.libs.json._
 
-class LoggingUtilSpec extends BasePlaySpec {
+class LoggingUtilSpec extends FlowPlaySpec {
+  lazy val logger: RollbarLogger = app.injector.instanceOf[RollbarLogger]
 
   private[this] val jsonSafeLogger = JsonSafeLogger(
     rollbar = logger,

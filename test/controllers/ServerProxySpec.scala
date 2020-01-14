@@ -1,8 +1,8 @@
 package controllers
 
-import helpers.BasePlaySpec
+import io.flow.test.utils.FlowPlaySpec
 
-class ServerProxySpec extends BasePlaySpec {
+class ServerProxySpec extends FlowPlaySpec {
 
   "query" in {
     ServerProxy.query(Map[String, Seq[String]]()) must be(Nil)

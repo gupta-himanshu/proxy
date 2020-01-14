@@ -1,13 +1,16 @@
 package lib
 
-import helpers.BasePlaySpec
+import io.flow.log.RollbarLogger
+import io.flow.test.utils.FlowPlaySpec
+
 import scala.io.Source
 
-class ServerParserSpec extends BasePlaySpec {
+class ServerParserSpec extends FlowPlaySpec {
 
   def configParser: ConfigParser = app.injector.instanceOf[ConfigParser]
 
   val uri = "file:///test"
+  lazy val logger: RollbarLogger = app.injector.instanceOf[RollbarLogger]
 
   val source = ProxyConfigSource(
     uri = uri,

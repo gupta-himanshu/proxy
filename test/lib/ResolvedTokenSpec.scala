@@ -2,11 +2,11 @@ package lib
 
 import java.util.UUID
 
-import helpers.BasePlaySpec
 import io.flow.common.v0.models.{Environment, Role}
+import io.flow.test.utils.FlowPlaySpec
 import org.joda.time.format.ISODateTimeFormat.dateTime
 
-class ResolvedTokenSpec extends BasePlaySpec {
+class ResolvedTokenSpec extends FlowPlaySpec {
 
   private[this] val requestId = UUID.randomUUID.toString
 

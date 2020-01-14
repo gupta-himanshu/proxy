@@ -1,8 +1,8 @@
 package lib
 
-import helpers.BasePlaySpec
+import io.flow.test.utils.FlowPlaySpec
 
-class ConfigSpec extends BasePlaySpec {
+class ConfigSpec extends FlowPlaySpec {
 
   private[this] lazy val config = app.injector.instanceOf[Config]
 

@@ -1,8 +1,8 @@
 package controllers
 
-import helpers.BasePlaySpec
+import io.flow.test.utils.FlowPlaySpec
 
-class HealthchecksSpec extends BasePlaySpec {
+class HealthchecksSpec extends FlowPlaySpec {
 
   override lazy val port = 9010
 

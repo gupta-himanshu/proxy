@@ -1,8 +1,8 @@
 package lib
 
-import helpers.BasePlaySpec
+import io.flow.test.utils.FlowPlaySpec
 
-class UtilSpec extends BasePlaySpec {
+class UtilSpec extends FlowPlaySpec {
 
   "toFlatSeq" in {
     Util.toFlatSeq(Map[String, Seq[String]]()) must be(Nil)

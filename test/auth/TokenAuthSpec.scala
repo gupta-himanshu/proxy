@@ -2,16 +2,16 @@ package auth
 
 import java.util.UUID
 
-import helpers.BasePlaySpec
-import io.flow.token.v0.mock
 import io.flow.common.v0.models.{Environment, OrganizationReference, UserReference}
 import io.flow.log.RollbarLogger
+import io.flow.test.utils.FlowPlaySpec
+import io.flow.token.v0.mock
 import io.flow.token.v0.models._
 import lib.ResolvedToken
 
 object TokenMockClient extends mock.Client
 
-class TokenAuthSpec extends BasePlaySpec {
+class TokenAuthSpec extends FlowPlaySpec {
 
   private[this] val tokenTestAuth = new TokenAuth with mock.Client {
     override def tokenClient = TokenMockClient

@@ -1,8 +1,8 @@
 package lib
 
-import helpers.BasePlaySpec
+import io.flow.test.utils.FlowPlaySpec
 
-class ServiceSpec extends BasePlaySpec {
+class ServiceSpec extends FlowPlaySpec {
 
   "organization" in {
     Route(Method.Get, "/foo").organization("/foo") must be(None)

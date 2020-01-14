@@ -1,6 +1,6 @@
 package controllers
 
-import helpers.BasePlaySpec
+import io.flow.test.utils.FlowPlaySpec
 import io.flow.usage.util.UsageUtil
 import io.flow.usage.v0.Client
 import io.flow.usage.v0.models.json._
@@ -10,7 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class UsageSpec extends BasePlaySpec {
+class UsageSpec extends FlowPlaySpec {
   private[this] def uu = app.injector.instanceOf[UsageUtil]
 
   import scala.concurrent.ExecutionContext.Implicits.global

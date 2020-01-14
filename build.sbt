@@ -21,7 +21,7 @@ lazy val root = project
       "io.flow" %% "lib-play-graphite-play26" % "0.1.29",
       "io.flow" %% "lib-usage" % "0.1.12",
       "org.yaml" % "snakeyaml" % "1.25",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
+      "io.flow" %% "lib-test-utils" % "0.0.73" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.2"),
       "com.github.ghik" %% "silencer-lib" % "1.4.2" % Provided
     ),
