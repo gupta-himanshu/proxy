@@ -1,6 +1,8 @@
 package lib
 
 import akka.util.ByteString
+import cats.data.NonEmptyChain
+import cats.data.Validated.Invalid
 import helpers.BasePlaySpec
 import io.flow.log.RollbarLogger
 import play.api.mvc.Headers
@@ -33,7 +35,7 @@ class ProxyRequestSpec extends BasePlaySpec {
       "callback" -> Seq("jj")
     )
 
-    val request = rightOrErrors(
+    val request = validOrErrors(
       ProxyRequest.validate(
         requestMethod = "get",
         requestPath = "/users/?foo=1&foo=2",
@@ -64,7 +66,7 @@ class ProxyRequestSpec extends BasePlaySpec {
   "validate method" must {
 
     "accept valid" in {
-      rightOrErrors(
+      validOrErrors(
         ProxyRequest.validate(
           requestMethod = "GET",
           requestPath = "/users/",
@@ -82,8 +84,8 @@ class ProxyRequestSpec extends BasePlaySpec {
         body = testBody,
         queryParameters = Map("method" -> Seq("foo")),
         headers = Headers()
-      ) must be(Left(
-        Seq(
+      ) must be(Invalid(
+        NonEmptyChain.one(
           "Invalid value 'foo' for query parameter 'method' - must be one of GET, POST, PUT, PATCH, DELETE, HEAD, CONNECT, OPTIONS, TRACE"
         )
       ))
@@ -96,8 +98,8 @@ class ProxyRequestSpec extends BasePlaySpec {
         body = testBody,
         queryParameters = Map("method" -> Seq("foo", "bar")),
         headers = Headers()
-      ) must be(Left(
-        Seq("Query parameter 'method', if specified, cannot be specified more than once")
+      ) must be(Invalid(
+        NonEmptyChain.one("Query parameter 'method', if specified, cannot be specified more than once")
       ))
     }
   }
@@ -105,7 +107,7 @@ class ProxyRequestSpec extends BasePlaySpec {
   "validate callback" must {
 
     "accept valid" in {
-      val request = rightOrErrors(
+      val request = validOrErrors(
         ProxyRequest.validate(
           requestMethod = "GET",
           requestPath = "/users/",
@@ -126,8 +128,8 @@ class ProxyRequestSpec extends BasePlaySpec {
         body = testBody,
         queryParameters = Map("callback" -> Seq("!!!")),
         headers = Headers()
-      ) must be(Left(
-        Seq("Callback query parameter, if specified, must contain only alphanumerics, '_' and '.' characters")
+      ) must be(Invalid(
+        NonEmptyChain.one("Callback query parameter, if specified, must contain only alphanumerics, '_' and '.' characters")
       ))
     }
 
@@ -138,8 +140,8 @@ class ProxyRequestSpec extends BasePlaySpec {
         body = testBody,
         queryParameters = Map("callback" -> Seq("   ")),
         headers = Headers()
-      ) must be(Left(
-        Seq("Callback query parameter, if specified, must be non empty")
+      ) must be(Invalid(
+        NonEmptyChain.one("Callback query parameter, if specified, must be non empty")
       ))
     }
 
@@ -150,8 +152,8 @@ class ProxyRequestSpec extends BasePlaySpec {
         body = testBody,
         queryParameters = Map("callback" -> Seq("foo", "bar")),
         headers = Headers()
-      ) must be(Left(
-        Seq("Query parameter 'callback', if specified, cannot be specified more than once")
+      ) must be(Invalid(
+        NonEmptyChain.one("Query parameter 'callback', if specified, cannot be specified more than once")
       ))
     }
   }
@@ -159,7 +161,7 @@ class ProxyRequestSpec extends BasePlaySpec {
   "validate envelope" must {
 
     "accept valid" in {
-      val request = rightOrErrors(
+      val request = validOrErrors(
         ProxyRequest.validate(
           requestMethod = "GET",
           requestPath = "/users/",
@@ -181,8 +183,8 @@ class ProxyRequestSpec extends BasePlaySpec {
         body = testBody,
         queryParameters = Map("envelope" -> Seq("foo")),
         headers = Headers()
-      ) must be(Left(
-        Seq("Invalid value 'foo' for query parameter 'envelope' - must be one of request, response")
+      ) must be(Invalid(
+        NonEmptyChain.one("Invalid value 'foo' for query parameter 'envelope' - must be one of request, response")
       ))
 
       ProxyRequest.validate(
@@ -191,13 +193,13 @@ class ProxyRequestSpec extends BasePlaySpec {
         body = testBody,
         queryParameters = Map("envelope" -> Seq("foo", "bar", "request", "response")),
         headers = Headers()
-      ) must be(Left(
-        Seq("Invalid values 'foo', 'bar' for query parameter 'envelope' - must be one of request, response")
+      ) must be(Invalid(
+        NonEmptyChain.one("Invalid values 'foo', 'bar' for query parameter 'envelope' - must be one of request, response")
       ))
     }
 
     "merges duplicates" in {
-      val request = rightOrErrors(
+      val request = validOrErrors(
         ProxyRequest.validate(
           requestMethod = "GET",
           requestPath = "/users/",

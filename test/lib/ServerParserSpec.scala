@@ -1,6 +1,9 @@
 package lib
 
+import cats.data.NonEmptyChain
+import cats.data.Validated.Invalid
 import helpers.BasePlaySpec
+
 import scala.io.Source
 
 class ServerParserSpec extends BasePlaySpec {
@@ -16,7 +19,7 @@ class ServerParserSpec extends BasePlaySpec {
 
   "empty" in {
     configParser.parse(uri, "   ").validate() must be(
-      Left(Seq("Missing uri", "Missing version"))
+      Invalid(NonEmptyChain("Missing uri", "Missing version"))
     )
   }
 
@@ -36,15 +39,13 @@ servers:
   - name: test
     host: https://test.api.flow.io
 """
-    configParser.parse(uri, spec).validate() must be(
-      Right(
-        ProxyConfig(
-          sources = Seq(source),
-          servers = Seq(
-            Server("test", "https://test.api.flow.io", logger)
-          ),
-          operations = Nil
-        )
+    validOrErrors(configParser.parse(uri, spec).validate()) must be(
+      ProxyConfig(
+        sources = Seq(source),
+        servers = Seq(
+          Server("test", "https://test.api.flow.io", logger)
+        ),
+        operations = Nil
       )
     )
   }
@@ -74,7 +75,7 @@ operations:
       logger = logger
     )
 
-    val cfg = rightOrErrors(
+    val cfg = validOrErrors(
       configParser.parse(uri, spec).validate()
     )
     cfg.sources must be(Seq(source.copy(version = "1.2.3")))
@@ -91,7 +92,7 @@ operations:
   "latest production config" in {
     val uri = "https://s3.amazonaws.com/io.flow.aws-s3-public/util/api-proxy/production.config"
     val contents = Source.fromURL(uri).mkString
-    val config = rightOrErrors(configParser.parse(uri, contents).validate())
+    val config = validOrErrors(configParser.parse(uri, contents).validate())
     Seq("user", "organization", "catalog").foreach { name =>
       val server = config.servers.find(_.name == name).getOrElse {
         sys.error(s"Failed to find server[$name]")
@@ -117,7 +118,7 @@ operations:
   "latest development config" in {
     val uri = "https://s3.amazonaws.com/io.flow.aws-s3-public/util/api-proxy/development.config"
     val contents = Source.fromURL(uri).mkString
-    val config = rightOrErrors(configParser.parse(uri, contents).validate())
+    val config = validOrErrors(configParser.parse(uri, contents).validate())
     Map(
       "user" -> "http://localhost:6021",
       "organization" -> "http://localhost:6081",
@@ -150,7 +151,7 @@ operations:
       "https://s3.amazonaws.com/io.flow.aws-s3-public/util/api-internal-proxy/development.config"
     )
     val proxyConfigFetcher = app.injector.instanceOf[ProxyConfigFetcher]
-    val config = proxyConfigFetcher.load(uris).right.get
+    val config = validOrErrors(proxyConfigFetcher.load(uris))
 
     Seq("currency", "currency-internal").foreach { name =>
       config.servers.find(_.name == name).getOrElse {
