@@ -138,7 +138,6 @@ class AuthorizationParser @Inject() (
     }
   }
 
-
   private[this] def parseJwtToken(claims: JsObject): Authorization =
     (claims \ "id").asOpt[String] match {
       case Some(userId) => Authorization.User(userId)
