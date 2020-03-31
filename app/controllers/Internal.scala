@@ -37,7 +37,14 @@ class Internal @Inject() (
     "status" -> "healthy"
   )
 
-  private[this] val RobotsTxt = "User-agent: *\nDisallow: /"
+  private[this] val RobotsTxt = """
+    |User-agent: *
+    |Disallow: /
+    |
+    |User-agent: Googlebot
+    |Allow: /shopify/shops/*/sessions
+    |Disallow: /
+    |""".stripMargin.trim
 
   def getRobots = Action { _ =>
     Ok(RobotsTxt)
