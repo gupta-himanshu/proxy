@@ -1,7 +1,7 @@
 package lib
 
 import io.flow.common.v0.models.{Environment, Role}
-import io.flow.proxy.auth.v0.models.AuthData
+import io.flow.proxy.auth.v0.models.{AuthData, Permissions}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat.dateTime
 
