@@ -21,9 +21,11 @@ case class ResolvedToken(
     AuthData(
       requestId = requestId,
       createdAt = DateTime.now,
+      permissions = Permissions(
+        roles = Nil,  // TODO
+      ),
       sessionId = sessionId,
       userId = userId,
-      userRoles = None, // TODO
       organizationId = organizationId,
       partnerId = partnerId,
       customerNumber = customerNumber,
