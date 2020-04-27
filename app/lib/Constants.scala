@@ -38,10 +38,13 @@ object Constants {
     val CfIpCountry = "CF-IPCountry"
     val CfVisitor = "CF-Visitor"
 
+    // List of headers we remove from an incoming request to
+    // prevent any external tampering
     val namesToRemove: Set[String] = Set(
       ContentType,
       ContentLength,
       FlowAuth,
+      FlowAuthV2,
       FlowRequestId,
       FlowServer,
       FlowHost,

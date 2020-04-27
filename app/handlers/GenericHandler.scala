@@ -177,13 +177,11 @@ class GenericHandler @Inject() (
       Constants.Headers.Host -> server.hostHeaderValue,
       Constants.Headers.ForwardedHost -> request.headers.get(Constants.Headers.Host).getOrElse(""),
       Constants.Headers.ForwardedOrigin -> request.headers.get(Constants.Headers.Origin).getOrElse(""),
-      Constants.Headers.ForwardedMethod -> request.originalMethod
+      Constants.Headers.ForwardedMethod -> request.originalMethod,
+      Constants.Headers.FlowAuthV2 -> flowJwtAuthDataProvider.instance.encodeAuthData(token.authData),
     ) ++ Seq(
       Some(
         Constants.Headers.FlowAuth -> flowAuth.jwt(token)
-      ),
-      Some(
-        Constants.Headers.FlowAuthV2 -> flowJwtAuthDataProvider.instance.encodeAuthData(token.authData)
       ),
 
       request.clientIp().map { ip =>
