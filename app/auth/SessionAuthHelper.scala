@@ -18,7 +18,7 @@ trait SessionAuthHelper extends LoggingHelper {
   )(implicit ec: ExecutionContext): Future[Option[AuthData]] = {
     sessionClient.sessionAuthorizations.post(
       SessionAuthorizationForm(session = sessionId),
-      requestHeaders = FlowAuth.headersFromRequestId(requestId)
+      requestHeaders = FlowAuth.headersForRequestId(requestId)
     ).map {
       case auth: OrganizationSessionAuthorization => {
         Some(

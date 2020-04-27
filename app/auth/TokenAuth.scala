@@ -41,7 +41,7 @@ trait TokenAuth extends LoggingHelper {
   ): Future[Option[AuthData]] = {
     tokenClient.tokens.postAuthentications(
       TokenAuthenticationForm(token = token),
-      requestHeaders = FlowAuth.headersFromRequestId(requestId)
+      requestHeaders = FlowAuth.headersForRequestId(requestId)
     ).map { tokenReference =>
       fromTokenReference(requestId, tokenReference)
     }.recoverWith {

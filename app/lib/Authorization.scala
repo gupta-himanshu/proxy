@@ -77,13 +77,9 @@ object Authorization {
   * whether or not authorization succeeded, and if not why.
   */
 class AuthorizationParser @Inject() (
-  config: Config,
-  logger: RollbarLogger
+  flowJwtAuthDataProvider: FlowJwtAuthDataProvider,
 ) {
-  private[this] val jwtAuthData: JwtAuthData = JwtAuthData(
-    saltProvider = SimpleJwtSaltProvider(config.jwtSalt),
-    logger = logger,
-  )
+  private[this] val flowJwtAuthData: JwtAuthData = flowJwtAuthDataProvider.instance
 
   /**
     * Parses the value from the authorization header, handling case
@@ -116,7 +112,7 @@ class AuthorizationParser @Inject() (
           }
 
           case Authorization.Prefixes.Bearer => {
-            jwtAuthData.decodeJson(value) match {
+            flowJwtAuthData.decodeJson(value) match {
               case Left(_) => Authorization.InvalidBearer
               case Right(claims) => parseJwtToken(claims)
             }

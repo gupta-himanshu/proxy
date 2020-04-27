@@ -21,6 +21,7 @@ class GenericHandler @Inject() (
   override val config: Config,
   override val logger: RollbarLogger,
   flowAuth: FlowAuth,
+  flowAuthV2: FlowAuthV2,
   apiBuilderServicesFetcher: ApiBuilderServicesFetcher
 )(implicit ec: ExecutionContext) extends Handler with HandlerUtilities {
 
@@ -181,6 +182,9 @@ class GenericHandler @Inject() (
     ) ++ Seq(
       Some(
         Constants.Headers.FlowAuth -> flowAuth.jwt(authData)
+      ),
+      Some(
+        Constants.Headers.FlowAuthV2 -> flowAuthV2.jwt(authData)
       ),
 
       request.clientIp().map { ip =>
