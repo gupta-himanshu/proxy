@@ -1,6 +1,7 @@
 package handlers
 
 import io.apibuilder.validation.FormData
+import io.flow.proxy.auth.v0.models.AuthData
 import javax.inject.{Inject, Singleton}
 import lib._
 import play.api.libs.ws.WSClient
@@ -22,7 +23,7 @@ class UrlFormEncodedHandler @Inject() (
     server: Server,
     request: ProxyRequest,
     route: Route,
-    token: ResolvedToken
+    authData: AuthData
   ): Future[Result] = {
     request.bodyUtf8 match {
       case None => Future.successful(
@@ -32,7 +33,7 @@ class UrlFormEncodedHandler @Inject() (
       )
 
       case Some(body) => {
-        processUrlFormEncoded(wsClient, server, request, route, token, Some(body))
+        processUrlFormEncoded(wsClient, server, request, route, authData, Some(body))
       }
     }
   }
@@ -47,7 +48,7 @@ class UrlFormEncodedHandler @Inject() (
     server: Server,
     request: ProxyRequest,
     route: Route,
-    token: ResolvedToken,
+    authData: AuthData,
     body: Option[String]
   ): Future[Result] = {
     val map = body match {
@@ -68,7 +69,7 @@ class UrlFormEncodedHandler @Inject() (
         server,
         request,
         route,
-        token,
+        authData,
         FormData.toJson(map)
       )
     }

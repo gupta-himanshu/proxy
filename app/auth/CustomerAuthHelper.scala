@@ -2,7 +2,7 @@ package auth
 
 import io.flow.customer.v0.models.Customer
 import io.flow.customer.v0.{Client => CustomerClient}
-import lib.ResolvedToken
+import io.flow.proxy.auth.v0.models.AuthData
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -14,8 +14,8 @@ trait CustomerAuthHelper extends LoggingHelper {
   private[auth] def getCustomerResolvedToken(
     requestId: String,
     customerNumber: String,
-    sessionResolvedTokenOption: Option[ResolvedToken]
-  )(implicit ec: ExecutionContext): Future[Option[ResolvedToken]] = {
+    sessionResolvedTokenOption: Option[AuthData]
+  )(implicit ec: ExecutionContext): Future[Option[AuthData]] = {
     sessionResolvedTokenOption.map { t =>
       getCustomerResolvedToken(
         requestId = requestId,
@@ -28,8 +28,8 @@ trait CustomerAuthHelper extends LoggingHelper {
   private[this] def getCustomerResolvedToken(
     requestId: String,
     customerNumber: String,
-    sessionResolvedToken: ResolvedToken
-  )(implicit ec: ExecutionContext): Future[Option[ResolvedToken]] = {
+    sessionResolvedToken: AuthData
+  )(implicit ec: ExecutionContext): Future[Option[AuthData]] = {
     sessionResolvedToken.organizationId.map { organizationId =>
       getCustomer(
         requestId = requestId,
@@ -59,14 +59,13 @@ trait CustomerAuthHelper extends LoggingHelper {
       )
     ).map { customer =>
       Some(customer)
-    }.recover {
-      case io.flow.customer.v0.errors.UnitResponse(_) => None
+    }.recoverWith {
+      case io.flow.customer.v0.errors.UnitResponse(_) => Future.successful(None)
       case ex: Throwable => {
-        val msg = "Error communication with customer service"
         log(requestId).
           withKeyValue("customer_number", customerNumber).
-          error(msg, ex)
-        throw new RuntimeException(msg, ex)
+          error("Error communicating with customer service", ex)
+        Future.failed(ex)
       }
     }
   }

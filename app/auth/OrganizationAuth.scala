@@ -3,7 +3,8 @@ package auth
 import com.github.ghik.silencer.silent
 import io.flow.organization.v0.interfaces.Client
 import io.flow.organization.v0.models.OrganizationAuthorizationForm
-import lib.{Constants, FlowAuth, ResolvedToken}
+import io.flow.proxy.auth.v0.models.AuthData
+import lib.{Constants, FlowAuth}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,11 +18,11 @@ trait OrganizationAuth extends LoggingHelper {
   def flowAuth: FlowAuth
 
   def authorizeOrganization(
-    token: ResolvedToken,
+    token: AuthData,
     organization: String
   )(
     implicit ec: ExecutionContext
-  ): Future[Option[ResolvedToken]] = {
+  ): Future[Option[AuthData]] = {
     if (Constants.StopWords.contains(organization)) {
       // javascript sending in 'undefined' or 'null' as session id
       Future.successful(None)
@@ -34,11 +35,11 @@ trait OrganizationAuth extends LoggingHelper {
   }
 
   private[this] def doAuthorizeOrganization(
-    token: ResolvedToken,
+    token: AuthData,
     organization: String
   )(
     implicit ec: ExecutionContext
-  ): Future[Option[ResolvedToken]] = {
+  ): Future[Option[AuthData]] = {
     val authFuture = (token.environment, token.organizationId) match {
       case (Some(env), Some(_)) => {
         organizationClient.organizationAuthorizations.post(
@@ -66,15 +67,15 @@ trait OrganizationAuth extends LoggingHelper {
           role = orgAuth.role: @silent
         )
       )
-    }.recover {
-      case io.flow.organization.v0.errors.UnitResponse(code) if code == 401 => None
+    }.recoverWith {
+      case io.flow.organization.v0.errors.UnitResponse(code) if code == 401 => Future.successful(None)
 
       case io.flow.organization.v0.errors.UnitResponse(code) => {
         log(token.requestId).
           organization(organization).
           withKeyValue("http_status_code", code).
           warn("Unexpected HTTP Status Code during organization token authorization - request will NOT be authorized")
-        None
+        Future.successful(None)
       }
 
       case ex: Throwable => {
@@ -82,7 +83,7 @@ trait OrganizationAuth extends LoggingHelper {
           organization(organization).
           withKeyValue("url", organizationClient.baseUrl).
           warn("Error communicating with organization server", ex)
-        sys.error("Error communicating with organization server")
+        Future.failed(ex)
       }
     }
   }

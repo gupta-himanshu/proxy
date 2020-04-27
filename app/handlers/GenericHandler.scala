@@ -3,6 +3,7 @@ package handlers
 import io.apibuilder.spec.v0.models.ParameterLocation
 import io.apibuilder.validation.{EncodingOptions, FormData, MultiService}
 import io.flow.log.RollbarLogger
+import io.flow.proxy.auth.v0.models.AuthData
 import javax.inject.{Inject, Singleton}
 import lib._
 import org.joda.time.DateTime
@@ -31,7 +32,7 @@ class GenericHandler @Inject() (
     server: Server,
     request: ProxyRequest,
     route: Route,
-    token: ResolvedToken
+    authData: AuthData
   ): Future[Result] = {
     if (enableAuditLogging) {
       val body = request.body.map {
@@ -42,7 +43,7 @@ class GenericHandler @Inject() (
       log(request, server, "start", Map("body" -> body.getOrElse("-")))
     }
 
-    val wsRequest = buildRequest(wsClient, server, request, route, token)
+    val wsRequest = buildRequest(wsClient, server, request, route, authData)
 
     request.body match {
       case None => {
@@ -86,7 +87,7 @@ class GenericHandler @Inject() (
     server: Server,
     request: ProxyRequest,
     route: Route,
-    token: ResolvedToken
+    authData: AuthData
   ): WSRequest = {
     wsClient.url(server.host + request.path)
       .withFollowRedirects(false)
@@ -96,7 +97,7 @@ class GenericHandler @Inject() (
         definedQueryParameters(request, route): _*
       )
       .addHttpHeaders(
-        proxyHeaders(server, request, token).headers: _*
+        proxyHeaders(server, request, authData).headers: _*
       )
   }
 
@@ -166,7 +167,7 @@ class GenericHandler @Inject() (
   private[this] def proxyHeaders(
     server: Server,
     request: ProxyRequest,
-    token: ResolvedToken
+    authData: AuthData
   ): Headers = {
 
     val headersToAdd = Seq(
@@ -179,7 +180,7 @@ class GenericHandler @Inject() (
       Constants.Headers.ForwardedMethod -> request.originalMethod
     ) ++ Seq(
       Some(
-        Constants.Headers.FlowAuth -> flowAuth.jwt(token)
+        Constants.Headers.FlowAuth -> flowAuth.jwt(authData)
       ),
 
       request.clientIp().map { ip =>

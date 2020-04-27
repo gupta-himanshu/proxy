@@ -1,5 +1,6 @@
 package handlers
 
+import io.flow.proxy.auth.v0.models.AuthData
 import javax.inject.{Inject, Singleton}
 import lib.{ProxyRequest, ResolvedToken, Route, Server}
 import play.api.libs.ws.WSClient
@@ -22,14 +23,14 @@ class JsonpHandler @Inject() (
     server: Server,
     request: ProxyRequest,
     route: Route,
-    token: ResolvedToken
+    authData: AuthData
   ): Future[Result] = {
     urlFormEncodedHandler.processUrlFormEncoded(
       wsClient,
       server,
       request,
       route,
-      token,
+      authData,
       request.rawQueryString
     )
   }

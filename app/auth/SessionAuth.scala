@@ -1,6 +1,7 @@
 package auth
 
-import lib.{Constants, ResolvedToken}
+import io.flow.proxy.auth.v0.models.AuthData
+import lib.Constants
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -13,7 +14,7 @@ trait SessionAuth extends SessionAuthHelper {
   def resolveSession(
     requestId: String,
     sessionId: String
-  ) (implicit ec: ExecutionContext): Future[Option[ResolvedToken]] = {
+  ) (implicit ec: ExecutionContext): Future[Option[AuthData]] = {
     if (Constants.StopWords.contains(sessionId)) {
       // javascript sending in 'undefined' or 'null' as session id
       Future.successful(None)
@@ -30,5 +31,5 @@ trait SessionAuth extends SessionAuthHelper {
     sessionId: String
   ) (
     implicit ec: ExecutionContext
-  ): Future[Option[ResolvedToken]] = postSessionAuthorization(requestId = requestId, sessionId = sessionId)
+  ): Future[Option[AuthData]] = postSessionAuthorization(requestId = requestId, sessionId = sessionId)
 }

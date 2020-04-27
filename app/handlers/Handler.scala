@@ -1,6 +1,7 @@
 package handlers
 
-import lib.{ProxyRequest, ResolvedToken, Route, Server}
+import io.flow.proxy.auth.v0.models.AuthData
+import lib.{ProxyRequest, Route, Server}
 import play.api.libs.ws.WSClient
 import play.api.mvc.Result
 
@@ -13,7 +14,7 @@ trait Handler {
     server: Server,
     request: ProxyRequest,
     route: Route,
-    token: ResolvedToken
+    authData: AuthData
   ): Future[Result]
 
 }

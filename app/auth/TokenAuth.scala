@@ -1,8 +1,10 @@
 package auth
 
+import io.flow.proxy.auth.v0.models.AuthData
 import io.flow.token.v0.interfaces.Client
 import io.flow.token.v0.models._
-import lib.{Constants, FlowAuth, ResolvedToken}
+import lib.{Constants, FlowAuth}
+import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,7 +21,7 @@ trait TokenAuth extends LoggingHelper {
     token: String
   )(
     implicit ec: ExecutionContext
-  ): Future[Option[ResolvedToken]] = {
+  ): Future[Option[AuthData]] = {
     if (Constants.StopWords.contains(token)) {
       // javascript sending in 'undefined' or 'null' as session id
       Future.successful(None)
@@ -36,42 +38,41 @@ trait TokenAuth extends LoggingHelper {
     token: String
   )(
     implicit ec: ExecutionContext
-  ): Future[Option[ResolvedToken]] = {
+  ): Future[Option[AuthData]] = {
     tokenClient.tokens.postAuthentications(
       TokenAuthenticationForm(token = token),
       requestHeaders = FlowAuth.headersFromRequestId(requestId)
     ).map { tokenReference =>
       fromTokenReference(requestId, tokenReference)
-
-    }.recover {
+    }.recoverWith {
       case io.flow.token.v0.errors.UnitResponse(404) => {
-        None
+        Future.successful(None)
       }
 
       case ex: Throwable => {
         val msg = "Could not communicate with token server"
         log(requestId).error(msg, ex)
-        throw new RuntimeException(msg, ex)
+        Future.failed(ex)
       }
     }
   }
 
-  def fromTokenReference(requestId: String, token: TokenReference): Option[ResolvedToken] = {
+  def fromTokenReference(requestId: String, token: TokenReference): Option[AuthData] = {
+    def base(userId: String) = AuthData(
+      requestId = requestId,
+      createdAt = DateTime.now,
+      userId = Some(userId),
+    )
+
     token match {
       case t: OrganizationTokenReference => Some(
-        ResolvedToken(
-          requestId = requestId,
-          userId = Some(t.user.id),
-          environment = Some(t.environment),
+        base(t.user.id).copy(
           organizationId = Some(t.organization.id)
         )
       )
 
       case t: PartnerTokenReference => Some(
-        ResolvedToken(
-          requestId = requestId,
-          userId = Some(t.user.id),
-          environment = Some(t.environment),
+        base(t.user.id).copy(
           partnerId = Some(t.partner.id)
         )
       )

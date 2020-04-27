@@ -1,8 +1,10 @@
 package auth
 
+import io.flow.proxy.auth.v0.models.AuthData
 import io.flow.session.v0.models.{OrganizationSessionAuthorization, SessionAuthorizationForm, SessionAuthorizationUndefinedType}
 import io.flow.session.v0.{Client => SessionClient}
-import lib.{FlowAuth, ResolvedToken}
+import lib.FlowAuth
+import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -13,24 +15,20 @@ trait SessionAuthHelper extends LoggingHelper {
   private[auth] def postSessionAuthorization(
     requestId: String,
     sessionId: String
-  )(implicit ec: ExecutionContext): Future[Option[ResolvedToken]] = {
+  )(implicit ec: ExecutionContext): Future[Option[AuthData]] = {
     sessionClient.sessionAuthorizations.post(
       SessionAuthorizationForm(session = sessionId),
       requestHeaders = FlowAuth.headersFromRequestId(requestId)
     ).map {
       case auth: OrganizationSessionAuthorization => {
-        val sessionResolvedToken =
-          ResolvedToken(
+        Some(
+          AuthData(
             requestId = requestId,
-            userId = None,
-            environment = Some(auth.environment),
+            createdAt = DateTime.now,
             organizationId = Some(auth.organization.id),
-            partnerId = None,
-            role = None,
-            sessionId = Some(sessionId)
+            sessionId = Some(sessionId),
           )
-
-        Some(sessionResolvedToken)
+        )
       }
 
       case SessionAuthorizationUndefinedType(other) => {
@@ -40,13 +38,13 @@ trait SessionAuthHelper extends LoggingHelper {
           warn("SessionAuthorizationUndefinedType")
         None
       }
-    }.recover {
+    }.recoverWith {
       case io.flow.session.v0.errors.UnitResponse(code) => {
         log(requestId).
           withKeyValue("http_status_code", code).
           withKeyValue("session_id", sessionId).
           warn("Unexpected HTTP Status Code - request will not be authorized")
-        None
+        Future.successful(None)
       }
 
       case e: io.flow.session.v0.errors.GenericErrorResponse => {
@@ -61,7 +59,7 @@ trait SessionAuthHelper extends LoggingHelper {
           }
         }
 
-        None
+        Future.successful(None)
       }
 
       case ex: Throwable => {
@@ -69,7 +67,7 @@ trait SessionAuthHelper extends LoggingHelper {
         log(requestId).
           withKeyValue("session_id", sessionId).
           error(msg, ex)
-        throw new RuntimeException(msg, ex)
+        Future.failed(ex)
       }
     }
   }

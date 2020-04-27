@@ -10,6 +10,7 @@ class RequestHeadersUtil @Inject()(
   authHeaders: AuthHeaders
 ) {
 
+  // TODO: Ideally remove this as we are hardcoding environment
   def organizationAsSystemUser(
     organizationId: String,
     requestId: String = AuthHeaders.generateRequestId("proxy")

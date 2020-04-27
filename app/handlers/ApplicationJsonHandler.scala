@@ -1,6 +1,7 @@
 package handlers
 
 import io.flow.log.RollbarLogger
+import io.flow.proxy.auth.v0.models.AuthData
 import javax.inject.{Inject, Singleton}
 import lib._
 import play.api.libs.json.{JsValue, Json}
@@ -22,7 +23,7 @@ class ApplicationJsonHandler @Inject() (
     server: Server,
     request: ProxyRequest,
     route: Route,
-    token: ResolvedToken
+    authData: AuthData
   ): Future[Result] = {
     val body = request.bodyUtf8.getOrElse("")
 
@@ -61,7 +62,7 @@ class ApplicationJsonHandler @Inject() (
     server: Server,
     request: ProxyRequest,
     route: Route,
-    token: ResolvedToken,
+    authData: AuthData,
     js: JsValue
   ): Future[Result] = {
     apiBuilderServicesFetcher.multiService.upcastOperationBody(route.method.toString, route.path, js) match {
