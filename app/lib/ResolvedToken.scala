@@ -1,6 +1,7 @@
 package lib
 
 import io.flow.common.v0.models.{Environment, Role}
+import io.flow.proxy.auth.v0.models.AuthData
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat.dateTime
 
@@ -16,6 +17,19 @@ case class ResolvedToken(
 ) {
   private[lib] val createdAt = DateTime.now
 
+  val authData: AuthData = {
+    AuthData(
+      requestId = requestId,
+      createdAt = DateTime.now,
+      sessionId = sessionId,
+      userId = userId,
+      userRoles = None, // TODO
+      organizationId = organizationId,
+      partnerId = partnerId,
+      customerNumber = customerNumber,
+    )
+  }
+
   def toMap: Map[String, String] = {
     Map(
       "request_id" -> Some(requestId),
@@ -29,5 +43,5 @@ case class ResolvedToken(
       "customer" -> customerNumber
     ).flatMap { case (key, value) => value.map { v => key -> v } }
   }
-  
+
 }

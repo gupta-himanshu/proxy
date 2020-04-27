@@ -17,6 +17,7 @@ object Constants {
   object Headers {
 
     val FlowAuth = "X-Flow-Auth"
+    val FlowAuthV2 = "X-Flow-Auth-V2"
     val FlowRequestId = "X-Flow-Request-Id"
     val FlowServer = "X-Flow-Server"
     val FlowHost = "X-Flow-Host"
