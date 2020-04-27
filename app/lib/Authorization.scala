@@ -85,7 +85,7 @@ class AuthorizationParser @Inject() (
 ) {
 
   /**
-    * Parses the value fro the authorization header, handling case
+    * Parses the value from the authorization header, handling case
     * where no authorization was present
     */
   def parse(value: Option[String]): Authorization = {
