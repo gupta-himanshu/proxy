@@ -6,10 +6,12 @@ import cats.implicits._
 import io.flow.customer.v0.{Client => CustomerClient}
 import io.flow.log.RollbarLogger
 import io.flow.organization.v0.{Client => OrganizationClient}
+import io.flow.proxy.auth.v0.models.AuthData
 import io.flow.session.v0.{Client => SessionClient}
 import io.flow.token.v0.{Client => TokenClient}
 import javax.inject.{Inject, Singleton}
 import lib._
+import org.joda.time.DateTime
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -111,7 +113,7 @@ class ReverseProxy @Inject () (
   private[this] def internalHandleValid(request: ProxyRequest, route: Operation) = {
     authorizationParser.parse(request.headers.get("Authorization")) match {
       case Authorization.NoCredentials => {
-        proxyPostAuth(request, route, token = ResolvedToken(requestId = request.requestId))
+        proxyPostAuth(request, route, token = AuthData(requestId = request.requestId, createdAt = DateTime.now))
       }
 
       case Authorization.Unrecognized => Future.successful(
