@@ -16,12 +16,9 @@ object FlowAuth {
 /**
   * Defines the data that goes into the flow auth set by the proxy server.
   */
-@Singleton
 final class FlowAuth @Inject () (
-  config: Config
+  config: Config,
 ) {
-
-  private[this] val header = JwtHeader(JwtAlgorithm.HS256)
 
   def headers(token: ResolvedToken): Seq[(String, String)] = {
     FlowAuth.headersFromRequestId(token.requestId) ++ Seq(
@@ -38,5 +35,5 @@ final class FlowAuth @Inject () (
     val claimsSet = JwtClaim() ++ (token.toMap.toSeq: _*)
     Jwt.encode(header, claimsSet, config.jwtSalt)
   }
-  
+
 }

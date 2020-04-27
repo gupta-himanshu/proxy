@@ -3,11 +3,9 @@ package lib
 import java.nio.charset.StandardCharsets
 
 import io.flow.log.RollbarLogger
-import javax.inject.{Inject, Singleton}
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtJson, JwtOptions}
+import io.flow.auth.v2.{JwtAuthData, SimpleJwtSaltProvider}
+import javax.inject.Inject
 import play.api.libs.json.JsObject
-
-import scala.util.{Failure, Success}
 
 sealed trait Authorization
 
@@ -78,11 +76,14 @@ object Authorization {
   * specific Authorization that can be used to clearly identify
   * whether or not authorization succeeded, and if not why.
   */
-@Singleton
 class AuthorizationParser @Inject() (
   config: Config,
   logger: RollbarLogger
 ) {
+  private[this] val jwtAuthData: JwtAuthData = JwtAuthData(
+    saltProvider = SimpleJwtSaltProvider(config.jwtSalt),
+    logger = logger,
+  )
 
   /**
     * Parses the value from the authorization header, handling case
@@ -115,13 +116,9 @@ class AuthorizationParser @Inject() (
           }
 
           case Authorization.Prefixes.Bearer => {
-            // whitelist only hmac algorithms
-            JwtJson.decodeJson(value, config.jwtSalt, JwtAlgorithm.allHmac) match {
-              case Success(claims) => parseJwtToken(claims)
-              case Failure(ex) =>
-                if (Jwt.isValid(value, JwtOptions.DEFAULT.copy(signature = false)))
-                  logger.info("JWT Token was valid, but we can't verify the signature", ex)
-                Authorization.InvalidBearer
+            jwtAuthData.decodeJson(value) match {
+              case Left(_) => Authorization.InvalidBearer
+              case Right(claims) => parseJwtToken(claims)
             }
           }
 
