@@ -60,14 +60,6 @@ end
 
 helpers = Helpers.new(uri, api_key_file)
 
-# One deploy had an error where these endpoints began returning 401 - test for that now.
-response = helpers.get("/demo/catalog/subcatalogs").with_api_key.execute
-subcatalog_id = response.json.first['id']
-assert_not_nil(subcatalog_id)
-
-assert_status(200, helpers.get("/demo/catalog/subcatalogs/#{subcatalog_id}/queries").with_api_key.execute)
-assert_status(200, helpers.get("/demo/catalog/subcatalogs/#{subcatalog_id}/statistics").with_api_key.execute)
-
 response = helpers.json_post("/demo/experiences/query/builders", { :discriminator => "query", :q => "test" }).with_api_key.execute
 assert_status(201, response)
 
