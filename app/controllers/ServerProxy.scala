@@ -102,7 +102,7 @@ class ServerProxyImpl @Inject()(
     if (request.jsonpCallback.isDefined) {
       jsonpHandler.process(wsClient, server, request, route, token)
     } else {
-      if (route.isShopifyWebhook && request.bodyUtf8.contains("{}")) {
+      if (route.isShopifyWebhook && request.path.contains("products")) {
         logger
           .withKeyValue("request_path", request.path)
           .withKeyValue("bodyUtf8", request.bodyUtf8)
