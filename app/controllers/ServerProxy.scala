@@ -102,11 +102,10 @@ class ServerProxyImpl @Inject()(
     if (request.jsonpCallback.isDefined) {
       jsonpHandler.process(wsClient, server, request, route, token)
     } else {
-      if (route.isShopifyWebhook && request.path.contains("products") && request.bodyUtf8.getOrElse("").size < 100) {
+      if (route.isShopifyWebhook && request.path.contains("products")) {
         logger
           .withKeyValue("request_path", request.path)
-          .withKeyValue("bodyUtf8", request.bodyUtf8)
-          .withKeyValue("request_id", request.requestId)
+          .withKeyValue("bodyUtf8_size", request.bodyUtf8.map(_.size))
           .withKeyValue("request_header_keys", request.headers.keys)
           .withKeyValue("shopify_header", request.headers.get("X-Shopify-Hmac-SHA256"))
           .info("Debugging shopify webhook body")
