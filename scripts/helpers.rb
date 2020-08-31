@@ -176,6 +176,10 @@ class Request
     self
   end
 
+  def with_session_id(session_id)
+    with_authorization_header("Session: " + session_id)
+  end
+
   def with_authorization_header(value)
     with_header("Authorization", value)
   end

@@ -157,6 +157,20 @@ assert_status(201, response)
 session_id = response.json['id']
 assert_not_nil(session_id)
 
+puts session_id
+puts "STARTING CHECKOUT TEST"
+response = helpers.json_post("/checkouts", {
+   :organization => "shopify-dev-sandbox",
+    :order => {
+       "items": [
+         {"number": "13211230175332", "quantity": 1 }
+       ]
+    }
+}).with_session_id(session_id).execute
+assert_status(201, response)
+puts response.inspect
+exit(1)
+
 response = wait_for_status("Org countries endpoint", 200) { helpers.get("/#{id}/countries").execute }
 assert_status(200, response)
 
