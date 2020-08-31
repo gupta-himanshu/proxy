@@ -78,7 +78,7 @@ response = helpers.json_post("/checkouts", {
    :organization => "shopify-dev-sandbox",
     :order => {
        "items": [
-         {"number": "13211230175332", "quantity": 1 }
+         
        ]
     }
 }).with_session_id(session_id).execute
