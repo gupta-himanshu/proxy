@@ -148,8 +148,9 @@ assert_generic_error(response, "Error in envelope request body: Request envelope
 response = helpers.json_post("/organizations/0?envelope=request", { :method => "GET", :headers => "test", :body => 'test' }).execute
 assert_generic_error(response, "Error in envelope request body: Request envelope field 'headers' must be an object")
 
-response = helpers.json_post("/organizations/#{id}?envelope=request", { :method => "GET" }).with_api_key.execute
-assert_status(200, response)
+response = wait_for_status("Org envelope request", 200) {
+  helpers.json_post("/organizations/#{id}?envelope=request", { :method => "GET" }).with_api_key.execute
+}
 
 # Start session testing
 response = wait_for_status("Org to propagate to session", 201) { helpers.json_post("/sessions/organizations/#{id}").execute }
