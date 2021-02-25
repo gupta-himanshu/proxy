@@ -28,8 +28,6 @@ object Hacks {
     "POST /:organization/order/builders",
     "POST /:organization/orders",
     "POST /:organization/orders/submissions",
-    "POST /bundles/checkout/:org/orders",
-    "POST /checkouts",
     "PUT /:organization/order-identifiers/:identifier",
     "PUT /:organization/orders/:number",
     "PUT /:organization/orders/:number/destination",
