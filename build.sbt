@@ -37,7 +37,7 @@ lazy val root = project
       "org.yaml" % "snakeyaml" % "1.27",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
     ),
-    javaAgents += "io.kamon" % "kanela-agent" % "1.0.7",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "0.84.0",
     testOptions += Tests.Argument("-oF"),
     scalacOptions ++= allScalacOptions,
   )
@@ -58,3 +58,9 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/"
 )
 version := "0.6.72"
+
+Universal / javaOptions ++= Seq(
+  "-Ddd.env=live",
+  "-Ddd.service=proxy",
+  s"-Ddd.version=${version.value}",
+)
