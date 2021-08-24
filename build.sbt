@@ -64,3 +64,4 @@ Universal / javaOptions ++= Seq(
   "-Ddd.service=proxy",
   s"-Ddd.version=${version.value}",
 )
+version := "0.6.73"
