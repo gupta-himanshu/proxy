@@ -8,6 +8,8 @@ import io.flow.log.RollbarLogger
 import io.flow.organization.v0.{Client => OrganizationClient}
 import io.flow.session.v0.{Client => SessionClient}
 import io.flow.token.v0.{Client => TokenClient}
+import io.opentracing.util.GlobalTracer
+
 import javax.inject.{Inject, Singleton}
 import lib._
 import play.api.mvc._
@@ -263,6 +265,11 @@ class ReverseProxy @Inject () (
     request: ProxyRequest,
     token: ResolvedToken
   ): Future[Result] = {
+
+    // Capture organization id in datadog tracing span
+    val span = Option(GlobalTracer.get().activeSpan())
+    span.foreach(_.setTag("flow.organization", organization))
+
     token.userId match {
       case None => {
         token.organizationId match {

@@ -35,6 +35,8 @@ lazy val root = project
       "io.flow" %% "lib-usage-play28" % "0.1.15",
       "org.typelevel" %% "cats-core" % "2.6.1",
       "org.yaml" % "snakeyaml" % "1.29",
+      "io.opentracing" % "opentracing-api" % "0.33.0",
+      "io.opentracing" % "opentracing-util" % "0.33.0",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
     ),
     javaAgents += "com.datadoghq" % "dd-java-agent" % "0.85.0",
