@@ -268,7 +268,7 @@ class ReverseProxy @Inject () (
 
     // Capture organization id in datadog tracing span
     val span = Option(GlobalTracer.get().activeSpan())
-    span.foreach(_.setTag("flow.organization", organization))
+    span.foreach(_.setBaggageItem("flow.organization", organization))
 
     token.userId match {
       case None => {
