@@ -123,7 +123,6 @@ class GenericHandler @Inject() (
           case _ => request.contentType
         }
       )
-      val contentLength: Option[String] = response.header("Content-Length")
 
       // Remove content type (to avoid adding twice below) then add common Flow headers
       val responseHeaders = Util.removeKeys(
@@ -135,10 +134,10 @@ class GenericHandler @Inject() (
         Constants.Headers.FlowProxyServiceTiming -> Seq(server.name + ";" + durationMs)
       )
 
-      if (request.responseEnvelope || response.status == 422) {
+      if (request.responseEnvelope) {
         request.response(response.status, safeBody(request, response).getOrElse(""), contentType, responseHeaders)
       } else {
-        contentLength match {
+        response.header(Constants.Headers.ContentLength) match {
           case None => {
             Results.Status(response.status).
               chunked(response.bodyAsSource).
