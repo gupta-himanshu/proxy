@@ -32,7 +32,7 @@ lazy val root = project
       "commons-codec" % "commons-codec" % "1.15",
       "io.apibuilder" %% "apibuilder-validation" % "0.4.21",
       "io.flow" %% "lib-metrics-play28" % "1.0.1",
-      "io.flow" %% "lib-usage-play28" % "0.1.15",
+      "io.flow" %% "lib-usage-play28" % "0.1.72",
       "org.typelevel" %% "cats-core" % "2.6.1",
       "org.yaml" % "snakeyaml" % "1.29",
       "io.opentracing" % "opentracing-api" % "0.33.0",
