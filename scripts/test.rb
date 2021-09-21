@@ -161,6 +161,20 @@ assert_not_nil(session_id)
 response = wait_for_status("Org countries endpoint", 200) { helpers.get("/#{id}/countries").execute }
 assert_status(200, response)
 
+# Test 204 response
+rule = helpers.json_post("/#{id}/fraud/email/rules",
+                         {
+                           rule: {
+                             decision: 'approved',
+                             email: 'tech@flow.io'
+                           }
+                         }).with_api_key.execute
+assert_status(201, rule)
+ruleId = rule.json['id']
+deletion = helpers.delete("/#{id}/fraud/email/rules/#{ruleId}").with_api_key.execute
+assert_status(204, deletion)
+assert_nil(deletion.headers['content-type'])
+
 puts "Tests Complete. Starting cleanup"
 
 cleanup(helpers)

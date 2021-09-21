@@ -1,4 +1,5 @@
 require 'time'
+require 'faraday'
 
 module ProxyGlobal
 
@@ -54,18 +55,19 @@ end
 
 class Response
 
-  attr_reader :request_method, :request_uri, :status, :body
+  attr_reader :request_method, :request_uri, :status, :body, :headers
 
-  def initialize(request_method, request_uri, status, body)
+  def initialize(request_method, request_uri, status, body, headers)
     @request_method = request_method
     @request_uri = request_uri
     @status = status
     @body = body
+    @headers = headers
   end
 
   def unwrap_envelope
     js = json
-    Response.new(@request_method, @request_uri, js['status'], ProxyGlobal.format_json(js['body']))
+    Response.new(@request_method, @request_uri, js['status'], ProxyGlobal.format_json(js['body']), @headers)
   end
 
   def unwrap_jsonp
@@ -75,7 +77,7 @@ class Response
       if md = stripped.match(/^(.+)\((.*)\)$/m)
         callback = md[1]
         js = ProxyGlobal.parse_json(md[2])
-        return Response.new(@request_method, @request_uri, js['status'], ProxyGlobal.format_json(js['body']))
+        return Response.new(@request_method, @request_uri, js['status'], ProxyGlobal.format_json(js['body']), @headers)
       end
     end
     raise "Cannot unwrap json from: " + @body
@@ -128,7 +130,6 @@ class Helpers
 
   def json_put(url, hash = nil)
     json_request("PUT", url, hash).with_content_type("application/json")
-
   end
 
   def json_post(url, hash = nil)
@@ -158,7 +159,7 @@ class Request
     @token = nil
     @path = nil
     @api_key = false
-    @headers = []
+    @headers = {}
 
     if !File.exists?(api_key_path)
       raise "ERROR: File[#{api_key_path}] does not exist"
@@ -181,7 +182,7 @@ class Request
   end
 
   def with_header(name, value)
-    @headers << [name, value]
+    @headers[name] = value
     self
   end
 
@@ -200,68 +201,46 @@ class Request
     self
   end
   
-  #curl("-X #{method} -d@#{path} -H 'Content-type: application/json' #{@base_url}#{url}")
   def execute
-    params = ["curl --silent -w 'status[%{http_code}]'"]
+    conn = Faraday.new do |f|
 
-    if @method.upcase != "GET"
-      params << "-X %s" % @method
+      if @api_key
+        f.request :basic_auth, File.read(@api_key_path).strip, ''
+      end
+
     end
 
-    @headers.each do |pair|
-      params << "-H '%s: %s'" % [pair[0], pair[1]]
-    end
-    
-    if @api_key
-      params << "-u `cat %s`:" % @api_key_path
-    end
-
+    body = nil
     if @path
-      params << "-d@%s" % @path
+      body = File.read(@path)
     end
 
-    params << "'%s'" % @url
-    
-    cmd = params.join(" ")
-    ProxyGlobal.info(cmd)
-    puts cmd.gsub(/\s+(\-+)/, " \\\n    \\1")
-    puts ""
+    puts "=> #{@method} #{@url}"
+    resp = conn.run_request(@method.downcase.to_sym, @url, body, @headers)
+    puts "   #{resp.status}"
 
-    tmpfile = ProxyGlobal.tmp_file_path
-    if system(cmd + " > #{tmpfile}")
-      results = IO.read(tmpfile).strip
-      if md = results.match(/status\[(\d+)\]/)
-        status = md[1].to_i
-        body = results.sub(/\s*status\[(\d+)\]\s*/, '')
+    r = Response.new(@method, @url, resp.status, resp.body, resp.headers)
+    if r.status >= 500 || r.status < 200
+      msg = []
+      msg << "ERROR: HTTP %s for %s %s" % [r.status, @method, @url]
+      msg << ""
 
-        r = Response.new(@method, @url, status, body)
-        if r.status >= 500 || r.status < 200
-          msg =[]
-          msg << "ERROR: HTTP %s for %s %s" % [r.status, @method, @url]
-          msg << ""
-
-          begin
-            js = JSON.parse(body)
-            if js["code"] && js["messages"]
-              msg << " - Code: %s" % js['code']
-              msg << "   %s" % js['messages'].join("\n   ")
-            else
-              msg << r.json_stack_trace
-            end
-          rescue
-            msg << r.json_stack_trace
-          end
-
-          raise msg.join("\n")
+      begin
+        js = JSON.parse(resp.body)
+        if js["code"] && js["messages"]
+          msg << " - Code: %s" % js['code']
+          msg << "   %s" % js['messages'].join("\n   ")
+        else
+          msg << r.json_stack_trace
         end
-        r
-      else
-        raise "ERROR: Could not parse HTTP Status code for %s %s" % [@method, @url]
-      end        
-    else
-      raise "ERROR: curl failed for %s" % cmd
+      rescue
+        msg << r.json_stack_trace
+      end
+
+      raise msg.join("\n")
     end
-  end  
+    r
+  end
 
   def Helpers.with_tmp_file(contents, opts={})
     delete = opts.delete(:delete)

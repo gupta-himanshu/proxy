@@ -137,15 +137,20 @@ class GenericHandler @Inject() (
       if (request.responseEnvelope) {
         request.response(response.status, safeBody(request, response).getOrElse(""), contentType, responseHeaders)
       } else {
-        response.header(Constants.Headers.ContentLength) match {
-          case None => {
+        (response.header(Constants.Headers.ContentLength), response.status) match {
+          case (None, 204) => {
+            Results.Status(204).
+              withHeaders(Util.toFlatSeq(responseHeaders): _*)
+          }
+
+          case (None, _) => {
             Results.Status(response.status).
               chunked(response.bodyAsSource).
               withHeaders(Util.toFlatSeq(responseHeaders): _*).
               as(contentType.toStringWithEncoding)
           }
 
-          case Some(length) => {
+          case (Some(length), _) => {
             Results.Status(response.status).
               sendEntity(
                 HttpEntity.Streamed(response.bodyAsSource, Some(length.toLong), Some(contentType.toStringWithEncoding))
