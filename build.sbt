@@ -66,4 +66,4 @@ Universal / javaOptions ++= Seq(
   s"-Ddd.version=${version.value}",
   s"-Ddd.service.mapping=postgresql:${name.value}-postgresql,java-aws-sdk:${name.value}-aws-sdk",
 )
-version := "0.6.76"
+version := "0.6.77"
