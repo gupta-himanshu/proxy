@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
 
+# ./test.rb [url]
+#  url: Optional URL for where proxy is running
+#
+# Example:
+#  ./test.rb https://api.flow.io
+
 require 'json'
 require 'securerandom'
 
