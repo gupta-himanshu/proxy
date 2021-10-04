@@ -38,6 +38,9 @@ flow:
   item:
     play_2_x_json:
     - app/generated/FlowItemV0Models.scala
+  merchant-of-record:
+    play_2_x_json:
+    - app/generated/FlowMerchantOfRecordV0Models.scala
   order-price:
     play_2_x_json:
     - app/generated/FlowOrderPriceV0Models.scala
@@ -62,6 +65,9 @@ flow:
   session:
     play_2_8_client:
     - app/generated/FlowSessionV0Client.scala
+  session-context:
+    play_2_x_json:
+    - app/generated/FlowSessionContextV0Models.scala
   token:
     play_2_8_client:
     - app/generated/FlowTokenV0Client.scala

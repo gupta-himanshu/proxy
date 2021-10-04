@@ -49,6 +49,10 @@ code:
       version: latest
       generators:
         play_2_x_json: app/generated
+    merchant-of-record:
+      version: latest
+      generators:
+        play_2_x_json: app/generated
     order-price:
       version: latest
       generators:
@@ -81,6 +85,10 @@ code:
       version: latest
       generators:
         play_2_8_client: app/generated
+    session-context:
+      version: latest
+      generators:
+        play_2_x_json: app/generated
     token:
       version: latest
       generators:
