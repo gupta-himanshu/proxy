@@ -21,6 +21,7 @@ sealed trait Route {
   private[this] val hasOrganizationResourceId: Boolean = path.startsWith("/organizations/:organization_id") && !(
     path == "/organizations/:organization_id" && method == Method.Post
   )
+  private[this] val hasChannel: Boolean = path.startsWith("/channels/:channel_id/")
   private[this] val hasPartner: Boolean = path == "/partners/:partner" || path.startsWith("/partners/:partner/")
   private[this] val isInternal: Boolean = path == "/internal" || path.startsWith("/internal/")
 
@@ -62,6 +63,22 @@ sealed trait Route {
         case _ => sys.error(s"$method $requestPath: Could not extract organization from organization resource url")
       }
 
+    } else {
+      None
+    }
+  }
+
+  /**
+   * By naming convention, if the path starts with /channels/:channel, we
+   * know that we need to authenticate that the requesting user has
+   * access to that channel.
+   */
+  def channel(requestPath: String): Option[String] = {
+    if (hasChannel) {
+      requestPath.split("/").toList match {
+        case _ :: _ :: channel :: _ => Some(channel)
+        case _ => sys.error(s"$method $requestPath: Could not extract channel from url")
+      }
     } else {
       None
     }

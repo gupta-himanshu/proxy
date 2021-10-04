@@ -8,6 +8,7 @@ case class ResolvedToken(
   requestId: String,
   userId: Option[String] = None,
   environment: Option[Environment] = None,
+  channelId: Option[String] = None,
   organizationId: Option[String] = None,
   partnerId: Option[String] = None,
   role: Option[Role] = None,
