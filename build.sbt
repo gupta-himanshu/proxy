@@ -31,8 +31,8 @@ lazy val root = project
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "commons-codec" % "commons-codec" % "1.15",
       "io.apibuilder" %% "apibuilder-validation" % "0.4.28",
-      "io.flow" %% "lib-metrics-play28" % "1.0.4",
-      "io.flow" %% "lib-usage-play28" % "0.1.72",
+      "io.flow" %% "lib-metrics-play28" % "1.0.9",
+      "io.flow" %% "lib-usage-play28" % "0.1.77",
       "org.typelevel" %% "cats-core" % "2.6.1",
       "org.yaml" % "snakeyaml" % "1.29",
       "io.opentracing" % "opentracing-api" % "0.33.0",
@@ -66,4 +66,4 @@ Universal / javaOptions ++= Seq(
   s"-Ddd.version=${version.value}",
   s"-Ddd.service.mapping=postgresql:${name.value}-postgresql,java-aws-sdk:${name.value}-aws-sdk",
 )
-version := "0.6.78"
+version := "0.6.79"
