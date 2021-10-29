@@ -21,7 +21,7 @@ sealed trait Route {
   private[this] val hasOrganizationResourceId: Boolean = path.startsWith("/organizations/:organization_id") && !(
     path == "/organizations/:organization_id" && method == Method.Post
   )
-  private[this] val hasChannel: Boolean = path.startsWith("/channels/:channel_id/")
+  private[this] val hasChannel: Boolean = path == "/channels/:channel" || path.startsWith("/channels/:channel/")
   private[this] val hasPartner: Boolean = path == "/partners/:partner" || path.startsWith("/partners/:partner/")
   private[this] val isInternal: Boolean = path == "/internal" || path.startsWith("/internal/")
 

@@ -24,6 +24,7 @@ case class ResolvedToken(
       "created_at" -> Some(dateTime.print(createdAt)),
       "session" -> sessionId,
       "organization" -> organizationId,
+      "channel" -> channelId,
       "partner" -> partnerId,
       "role" -> role.map(_.toString),
       "environment" -> environment.map(_.toString),

@@ -1,8 +1,8 @@
 package auth
 
 import java.util.UUID
-
 import helpers.BasePlaySpec
+import io.flow.channel.v0.models.ChannelReference
 import io.flow.token.v0.mock
 import io.flow.common.v0.models.{Environment, OrganizationReference, UserReference}
 import io.flow.log.RollbarLogger
@@ -34,9 +34,32 @@ class TokenAuthSpec extends BasePlaySpec {
           requestId = requestId,
           userId = Some("5"),
           organizationId = Some("tst"),
+          channelId = None,
           partnerId = None,
           role = None,
           environment = Some(Environment.Production)
+        )
+      )
+    )
+  }
+
+  "from channel" in {
+    val token = ChannelTokenReference(
+      id = "0",
+      channel = ChannelReference(id = "tst"),
+      user = UserReference("5")
+    )
+
+    tokenTestAuth.fromTokenReference(requestId, token) must equal(
+      Some(
+        ResolvedToken(
+          requestId = requestId,
+          userId = Some("5"),
+          organizationId = None,
+          channelId = Some("tst"),
+          partnerId = None,
+          role = None,
+          environment = None,
         )
       )
     )
@@ -56,6 +79,7 @@ class TokenAuthSpec extends BasePlaySpec {
           requestId = requestId,
           userId = Some("5"),
           organizationId = None,
+          channelId = None,
           partnerId = Some("foo"),
           role = None,
           environment = Some(Environment.Production)

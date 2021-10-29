@@ -268,9 +268,6 @@ class ReverseProxy @Inject () (
       request,
       operation.route,
       token,
-      channel = None,
-      organization = None,
-      partner = None,
     )
   }
 
@@ -322,14 +319,7 @@ class ReverseProxy @Inject () (
             // Use org token here as the data returned came from the
             // organization service (supports having a sandbox token
             // on a production org)
-            lookup(operation.server.name).proxy(
-              request,
-              operation.route,
-              orgToken,
-              channel = None,
-              organization = Some(organization),
-              partner = None,
-            )
+            proxyDefault(operation, request, orgToken)
           }
         }
       }
@@ -353,14 +343,7 @@ class ReverseProxy @Inject () (
 
       case Some(_) => {
         if (token.channelId.contains(channel)) {
-          lookup(operation.server.name).proxy(
-            request,
-            operation.route,
-            token,
-            channel = Some(channel),
-            organization = None,
-            partner = None,
-          )
+          proxyDefault(operation, request, token)
         } else {
           Future.successful(
             request.responseUnauthorized(invalidChannelMessage(channel))
@@ -391,9 +374,6 @@ class ReverseProxy @Inject () (
             request,
             operation.route,
             token,
-            channel = None,
-            organization = None,
-            partner = Some(partner),
           )
         } else {
           Future.successful(
