@@ -25,8 +25,6 @@ trait ServerProxy {
     request: ProxyRequest,
     route: Route,
     token: ResolvedToken,
-    organization: Option[String] = None,
-    partner: Option[String] = None
   ): Future[play.api.mvc.Result]
 
 }
@@ -94,8 +92,6 @@ class ServerProxyImpl @Inject()(
     request: ProxyRequest,
     route: Route,
     token: ResolvedToken,
-    organization: Option[String] = None,
-    partner: Option[String] = None
   ): Future[Result] = {
     if (request.jsonpCallback.isDefined) {
       jsonpHandler.process(wsClient, server, request, route, token)

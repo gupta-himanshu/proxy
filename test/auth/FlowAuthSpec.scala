@@ -15,7 +15,8 @@ class FlowAuthSpec extends BasePlaySpec with TryValues {
     "create jwt" in {
       val token = ResolvedToken(
         requestId = "123",
-        sessionId = Some("abc")
+        sessionId = Some("abc"),
+        channelId = Some("cha-cha-cha"),
       )
       val jwt = flowAuth.jwt(token)
 
@@ -23,6 +24,7 @@ class FlowAuthSpec extends BasePlaySpec with TryValues {
 
       (decoded \ "request_id").as[String] mustBe "123"
       (decoded \ "session").as[String] mustBe "abc"
+      (decoded \ "channel").as[String] mustBe "cha-cha-cha"
     }
 
     "create headers" in {

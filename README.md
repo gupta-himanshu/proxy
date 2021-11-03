@@ -72,10 +72,11 @@ http://localhost:7000/_internal_/config
 
 ## Example configuration files
 
-environment variable     | example URL
+environment variable     | example value
 ------------------------ | ---------------
 PROXY_CONFIG_URIS        | https://s3.amazonaws.com/io.flow.aws-s3-public/util/api-proxy/latest/development.config.yml
 APIBUILDER_SERVICE_URIS  | https://s3.amazonaws.com/io.flow.aws-s3-public/util/api-proxy/latest/api.service.json
+JWT_SALT                 | test
 
 Multiple URIS can be provided as a single, comma-separated string.
 
@@ -85,4 +86,11 @@ Multiple URIS can be provided as a single, comma-separated string.
 
 ```
 http://localhost:7000/_internal_/route
+```
+
+## Tests
+
+In order to run the unit tests, the above environment variables need to be specified, eg:
+```
+APIBUILDER_SERVICE_URIS=https://s3.amazonaws.com/io.flow.aws-s3-public/util/api-proxy/latest/api.service.json PROXY_CONFIG_URIS=https://s3.amazonaws.com/io.flow.aws-s3-public/util/api-proxy/latest/development.config.yml JWT_SALT=test sbt test
 ```

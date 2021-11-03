@@ -3,6 +3,11 @@ flow:
   catalog:
     play_2_x_json:
     - app/generated/FlowCatalogV0Models.scala
+  channel:
+    play_2_8_client:
+    - app/generated/FlowChannelV0Client.scala
+    play_2_8_mock_client:
+    - test/generated/FlowChannelV0MockClient.scala
   checkout-configuration:
     play_2_x_json:
     - app/generated/FlowCheckoutConfigurationV0Models.scala

@@ -13,6 +13,11 @@ code:
       generators:
         play_2_x_json: app/generated
         play_2_8_mock_client: test/generated
+    channel:
+      version: latest
+      generators:
+        play_2_8_client: app/generated
+        play_2_8_mock_client: test/generated
     currency:
       version: latest
       generators:

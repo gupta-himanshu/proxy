@@ -58,6 +58,14 @@ trait TokenAuth extends LoggingHelper {
 
   def fromTokenReference(requestId: String, token: TokenReference): Option[ResolvedToken] = {
     token match {
+      case t: ChannelTokenReference => Some(
+        ResolvedToken(
+          requestId = requestId,
+          userId = Some(t.user.id),
+          channelId = Some(t.channel.id),
+        )
+      )
+
       case t: OrganizationTokenReference => Some(
         ResolvedToken(
           requestId = requestId,

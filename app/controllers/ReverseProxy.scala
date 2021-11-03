@@ -218,13 +218,24 @@ class ReverseProxy @Inject () (
       case Right(operation) => {
         operation.route.organization(request.path) match {
           case None => {
-            operation.route.partner(request.path) match {
-              case None => proxyDefault(operation, request, token)
-              case Some(partner) => {
+            operation.route.channel(request.path) match {
+              case None => {
+                operation.route.partner(request.path) match {
+                  case None => proxyDefault(operation, request, token)
+                  case Some(partner) => {
+                    // should return 401 if the path is for a partner route, but the token doesn't have an explicit partnerId
+                    token.partnerId match {
+                      case None => Future.successful(request.responseUnauthorized(invalidPartnerMessage(partner)))
+                      case Some(_) => proxyPartner(operation, partner, request, token)
+                    }
+                  }
+                }
+              }
+              case Some(channel) => {
                 // should return 401 if the path is for a partner route, but the token doesn't have an explicit partnerId
-                token.partnerId match {
-                  case None => Future.successful(request.responseUnauthorized(invalidPartnerMessage(partner)))
-                  case Some(_) => proxyPartner(operation, partner, request, token)
+                token.channelId match {
+                  case None => Future.successful(request.responseUnauthorized(invalidChannelMessage(channel)))
+                  case Some(_) => proxyChannel(operation, channel, request, token)
                 }
               }
             }
@@ -233,9 +244,12 @@ class ReverseProxy @Inject () (
           case Some(org) => {
             // should return 401 if route is for an org, but token is a partner token
             // note that console uses a token without an org, just a user - so can't be too strict here
-            token.partnerId match {
-              case None => proxyOrganization(operation, org, request, token)
-              case Some(_) => Future.successful(request.responseUnauthorized(
+            (token.channelId, token.partnerId) match {
+              case (None, None) => proxyOrganization(operation, org, request, token)
+              case (Some(_), _) => Future.successful(request.responseUnauthorized(
+                s"Token is associated with a channel and not the organization '$org'"
+              ))
+              case (_, Some(_)) => Future.successful(request.responseUnauthorized(
                 s"Token is associated with a partner and not the organization '$org'"
               ))
             }
@@ -254,8 +268,6 @@ class ReverseProxy @Inject () (
       request,
       operation.route,
       token,
-      None,
-      None
     )
   }
 
@@ -307,14 +319,35 @@ class ReverseProxy @Inject () (
             // Use org token here as the data returned came from the
             // organization service (supports having a sandbox token
             // on a production org)
-            lookup(operation.server.name).proxy(
-              request,
-              operation.route,
-              orgToken,
-              Some(organization),
-              None
-            )
+            proxyDefault(operation, request, orgToken)
           }
+        }
+      }
+    }
+  }
+
+  private[this] def proxyChannel(
+    operation: Operation,
+    channel: String,
+    request: ProxyRequest,
+    token: ResolvedToken
+  ): Future[Result] = {
+    token.userId match {
+      case None => {
+        // Currently all channel requests require authorization. Deny
+        // access as there is no auth token present.
+        Future.successful(
+          request.responseUnauthorized("Missing authorization headers")
+        )
+      }
+
+      case Some(_) => {
+        if (token.channelId.contains(channel)) {
+          proxyDefault(operation, request, token)
+        } else {
+          Future.successful(
+            request.responseUnauthorized(invalidChannelMessage(channel))
+          )
         }
       }
     }
@@ -341,7 +374,6 @@ class ReverseProxy @Inject () (
             request,
             operation.route,
             token,
-            partner = Some(partner)
           )
         } else {
           Future.successful(
@@ -457,6 +489,17 @@ class ReverseProxy @Inject () (
   private[this] def mustFindServerByName(name: String): Server = {
     findServerByName(name).getOrElse {
       sys.error(s"There is no server named '$name' in the current config: " + index.config.sources.map(_.uri))
+    }
+  }
+
+  private[this] def invalidChannelMessage(channel: String): String = {
+    channel.trim.toLowerCase match {
+      case ":channel" => {
+        s"Please replace ':channel' with your channel id"
+      }
+      case _ => {
+        s"Not authorized to access channel '$channel' or the channel does not exist"
+      }
     }
   }
 
