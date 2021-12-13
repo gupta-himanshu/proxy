@@ -52,7 +52,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("proxy-" + _),
   Test / javaOptions += "-Dconfig.file=conf/application.test.conf",
-  newrelicConfig := (resourceDirectory in Compile).value / "newrelic.yml",
+  newrelicConfig := (Compile / resourceDirectory).value / "newrelic.yml",
   Compile / doc / sources := Seq.empty,
   Compile / packageDoc / publishArtifact := false,
   credentials += credsToUse,
