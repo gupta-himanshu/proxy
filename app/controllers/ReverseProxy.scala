@@ -32,6 +32,7 @@ class ReverseProxy @Inject () (
   with auth.TokenAuth
   with auth.SessionAuth
   with auth.CustomerAuth
+  with auth.ChannelAuth
 {
 
   val index: Index = proxyConfigFetcher.current()
@@ -342,12 +343,10 @@ class ReverseProxy @Inject () (
       }
 
       case Some(_) => {
-        if (token.channelId.contains(channel)) {
-          proxyDefault(operation, request, token)
-        } else {
-          Future.successful(
-            request.responseUnauthorized(invalidChannelMessage(channel))
-          )
+        authorizeChannel(token, channel).flatMap {
+          case None => Future.successful(request.responseUnauthorized(invalidChannelMessage(channel)))
+
+          case Some(_) => proxyDefault(operation, request, token)
         }
       }
     }
